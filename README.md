@@ -1,6 +1,7 @@
 # Covid-19-Spread-Analysis-Dashboard
 Dashboard, Tracks Real-Time data on Covid-19<br>
 ![worldCases.png](Plots and components/worldCasesmap.png)
+<img src = 'Plots and components/worldCasesmap.png'>
 World Map showing Total reported Cases, color scale signifying the Number of Cases.
 <br><br>
 ![worldDeaths.png](Plots and components/worldDeathmap.png) 
