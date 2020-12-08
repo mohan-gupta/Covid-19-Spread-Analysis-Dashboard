@@ -240,44 +240,45 @@ app.layout = html.Div([dcc.Interval(
                         n_intervals=0,
                         interval=24*60*60*1000,
                         id='interval_component'
-                    ),dbc.Row(
-        dbc.Col(dcc.Markdown(title), width={'size': 6})
-    ),
+                    ),
+                html.Div([
+                    dbc.Row(dbc.Col(dcc.Markdown(title), width={'size': 6})),
 
-        dbc.Row(
-            dbc.Col(dbc.Tabs(
-                [
-                    dbc.Tab(world_cases, label='Cases', label_style={'fontWeight': 'bold'},tab_id='world_cases'),
-                    dbc.Tab(world_deaths, label='Deaths', label_style={'fontWeight': 'bold'},tab_id='world_deaths')
-                ],
-                active_tab='world_cases'
-            ), align='center')
-        ),
+                    dbc.Row(
+                        dbc.Col(dbc.Tabs(
+                            [
+                                dbc.Tab(world_cases, label='Cases', label_style={'fontWeight': 'bold'},tab_id='world_cases'),
+                                dbc.Tab(world_deaths, label='Deaths', label_style={'fontWeight': 'bold'},tab_id='world_deaths')
+                            ],
+                            active_tab='world_cases'
+                        ), align='center')
+                    ),
 
-        dbc.Row(
-            dbc.Col(dcc.Markdown(cas_dth), width={'size': 10, 'offset': 2})
-        ),
+                    dbc.Row(
+                        dbc.Col(dcc.Markdown(cas_dth), width={'size': 10, 'offset': 2})
+                    ),
 
-        dbc.Row(
-            [
-                dbc.Col(html.Div(cd_grph_cases), width={'size': 6, 'order': 1}),
-                dbc.Col(html.Div(cd_grph_deaths), width={'size': 6, 'order': 2})
-            ],
-        ),
+                    dbc.Row(
+                        [
+                            dbc.Col(html.Div(cd_grph_cases), width={'size': 6, 'order': 1}),
+                            dbc.Col(html.Div(cd_grph_deaths), width={'size': 6, 'order': 2})
+                        ],
+                    ),
 
-        dbc.Row(
-            dbc.Col(Cardtabs, width={'size': 12})
-        ),
+                    dbc.Row(
+                        dbc.Col(Cardtabs, width={'size': 12})
+                    ),
 
-        dbc.Row(
-            dbc.Col(
-                dcc.Dropdown(id='country_dropdown', options=countries_option,
-                             value=['India'], multi=True),
-                width={'size': 5}
-            )
-        ),
-        dbc.Row(dbc.Col(dcc.Graph(id='countryGraph'), width={'size': 12}))
-        ],
+                    dbc.Row(
+                        dbc.Col(
+                            dcc.Dropdown(id='country_dropdown', options=countries_option,
+                                         value=['India'], multi=True),
+                            width={'size': 5}
+                        )
+                    ),
+                    dbc.Row(dbc.Col(dcc.Graph(id='countryGraph'), width={'size': 12}))],
+                    id = 'LayoutDiv')
+                    ],
                               id='main_div')
 
 
@@ -285,7 +286,7 @@ app.layout = html.Div([dcc.Interval(
 #----------------------------------------------------------------------------------------------------------------
 
 #-----------------------------------------Callback to Live update app -----------------------------------------
-@app.callback(Output('main_div','children'),
+@app.callback(Output('LayoutDiv','children'),
               [Input('interval_component','n_interval')])
 def updateLayout(n):
     global df
