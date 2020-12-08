@@ -1,10 +1,10 @@
 # Covid-19-Spread-Analysis-Dashboard
 Dashboard, Tracks Real-Time data on Covid-19<br><br><br>
 <img src ='https://github.com/Mohan-Gupta/Covid-19-Spread-Analysis-Dashboard/blob/main/Plots%20and%20components/worldCasesMap.png'>
-World Map showing Total reported Cases, color scale signifying the Number of Cases.
+World Map showing Total reported Cases in each country, color scale signifying the Number of Cases.
 <br><br>
 <img src = 'https://github.com/Mohan-Gupta/Covid-19-Spread-Analysis-Dashboard/blob/main/Plots%20and%20components/worldDeathMap.png'>
-World Map showing Total reported Cases, color scale signifying the Number of Cases.
+World Map showing Total reported Deaths in each country, color scale signifying the Number of Cases.
 <br><br>
 <img src = 'https://github.com/Mohan-Gupta/Covid-19-Spread-Analysis-Dashboard/blob/main/Plots%20and%20components/Top10.png'>
 Two Bar Plots showcasing the 10 countries with Highest number of Cases and Deaths respectively.
