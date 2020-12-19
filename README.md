@@ -17,7 +17,7 @@ Data Table displaying the records or each country, Cases Reported, Deaths Report
  14 Days Tab displays the data reported within the last 14 Days.
  <br><br>
  <img src = 'https://github.com/Mohan-Gupta/Covid-19-Spread-Analysis-Dashboard/blob/main/Plots%20and%20components/Country.png'><br><br>
- An Area chart that show the time series data for country(countries) selected from the dropdown menu
+ An Area chart that shows the time series data for country(countries) selected from the dropdown menu
  <br><br>
  Data Source: European Centre for Disease Prevention and Control<br>
  site link: https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide
