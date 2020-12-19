@@ -9,7 +9,6 @@ from dash.dependencies import Input,Output
 import datetime
 import plotly.graph_objects as go
 
-## things to do: Format Markdown
 
 #----------------------------------------------------------------------------------------------------------
 #Reading the data
@@ -19,40 +18,41 @@ df = pd.read_csv(link)
 print('data set extracted')
 
 #Data Pre-Processing
-df.rename(columns={'countriesAndTerritories':'country','countryterritoryCode':'isocode',
-                  'popData2019':'population','continentExp':'continent'},inplace=True)
+def data_preprcoss(df):
+    #Renamin Columns
+    df.rename(columns={'countriesAndTerritories':'country','countryterritoryCode':'isocode',
+                      'popData2019':'population','continentExp':'continent'},inplace=True)
 
-df.drop('geoId',axis=1,inplace=True)
+    #Dropping unnecessary Columns, dropping dateRep due to uncosistent data
+    df.drop(['dateRep','geoId','Cumulative_number_for_14_days_of_COVID-19_cases_per_100000'],axis=1,inplace=True)
 
-df['country']=df['country'].apply(lambda x:x.replace('_',' '))
+    #Formatting Columns
+    df['country']=df['country'].apply(lambda x:x.replace('_',' '))
 
-df.loc[df['country']=='Wallis and Futuna','isocode']='WLF'
+    #imputing missing Data
+    df.loc[df['country']=='Wallis and Futuna','isocode']='WLF'
 
-df.loc[df['country']=='Wallis and Futuna','population']=11164
+    df.loc[df['country']=='Wallis and Futuna','population']=11164
 
-df['isocode'].fillna('Not Provided',inplace=True)
+    df['isocode'].fillna('Not Provided',inplace=True)
 
-df['population'].fillna('Not Provided',inplace=True)
-df['population'].fillna('Not Provided',inplace=True)
+    df['population'].fillna('Not Provided',inplace=True)
+    df['population'].fillna('Not Provided',inplace=True)
 
+    #generating date from other columns
+    df['date'] =  df['year'].astype(str)+'-'+df['month'].astype(str) +'-'+df['day'].astype(str)
+    df['date'] = pd.to_datetime(df['date'])
+    return df
+
+df = data_preprcoss(df)
 
 #----------------------------------------------------------------------------------------------------------
-#----------------------------------------------------------------------------------------------------------
-#dropping dateRep due to format inconsistencies
-df.drop('dateRep',axis=1,inplace=True)
-
-#----------------------------------------------------------------------------------------------------------
-df['date'] =  df['year'].astype(str)+'-'+df['month'].astype(str) +'-'+df['day'].astype(str)
-df['date'] = pd.to_datetime(df['date'])
-
-
-#----------------------------------------------------------------------------------------------------------
-#Reading unique countries
+#Reading unique countries and generating list of options
 countries_option = [{'label':i,'value':i} for i in df['country'].unique()]
 
 #----------------------------------------------------------------------------------------------------------
 
-####-------------------------- Functions to plot graphs----------------------------------------------------
+####-------------------------- FUNCTIONS TO PLOT GRAPHS----------------------------------------------------
 
 #----------------------------Function to plot world map---------------------------------------------------
 def map_cases_deaths(df,feature):
@@ -100,9 +100,12 @@ def get_data(period):
                 14: for last 14 days'''
     if period==0:
         df_date = df
+    elif period==1:
+        last_24hrs = pd.to_datetime(datetime.date.today()-datetime.timedelta(1))
+        df_date = df[df['date']==last_24hrs]
+
     else:
         dates = pd.date_range(end=datetime.date.today(), periods=period, freq='1D')
-        #dates = pd.date_range(end='2020-10-28', periods=period, freq='1D')
         df_date = df[df['date'].isin(dates)]
 
     new_df = df_date.groupby('country', as_index=False).agg({'cases': 'sum', 'deaths': 'sum'})
@@ -179,12 +182,7 @@ dt_14 = to_dataTable(df_14,'14')
 bs='https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/darkly/bootstrap.min.css'
 
 #----------------------------------------------------------------------------------------------------------
-####------------------------------- Initialising App ------------------------------------------------------
-
-app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-#----------------------------------------------------------------------------------------------------------
-######################## Bootstrap Cards
+#---------------------------------------------- BOOTSTRAP CARDS--------------------------------------------
 
 #------------------------------------------Card for World Maps---------------------------------------------
 
@@ -234,53 +232,67 @@ Cardtabs = dbc.Card([
                     ],style={'padding':3})
 
 #----------------------------------------------------------------------------------------------------------
-######------------------------------------ App Layout------------------------------------------------------
+####------------------------------- Initialising App ------------------------------------------------------
 
+app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+#----------------------------------------------------------------------------------------------------------
+#this allows dash to understand that we are deploying this to a server
+#server = app.server
+#----------------------------------------------------------------------------------------------------------
+######------------------------------------ App Layout------------------------------------------------------
+app_layout =[
+            dbc.Row(
+                    dbc.Col(dcc.Markdown(title), width={'size': 6})
+                    ),
+
+            dbc.Row(
+                dbc.Col(dbc.Tabs(
+                    [
+                        dbc.Tab(world_cases, label='Cases', label_style={'fontWeight': 'bold'},tab_id='world_cases'),
+                        dbc.Tab(world_deaths, label='Deaths', label_style={'fontWeight': 'bold'},tab_id='world_deaths')
+                    ],
+                    active_tab='world_cases'
+                ), align='center')
+            ),
+
+            dbc.Row(
+                dbc.Col(dcc.Markdown(cas_dth), width={'size': 10, 'offset': 2})
+                ),
+
+            dbc.Row(
+                [
+                    dbc.Col(html.Div(cd_grph_cases), width={'size': 6, 'order': 1}),
+                    dbc.Col(html.Div(cd_grph_deaths), width={'size': 6, 'order': 2})
+                ],
+                ),
+
+            dbc.Row(
+                dbc.Col(Cardtabs, width={'size': 12})
+                ),
+
+            dbc.Row(
+                dbc.Col(
+                    dcc.Dropdown(id='country_dropdown', options=countries_option,
+                                value=['India'], multi=True),
+                    width={'size': 5}
+                    )
+                ),
+            dbc.Row(dbc.Col(dcc.Graph(id='countryGraph'), width={'size': 12}))
+        ]
+
+#----------------------------------------------------------------------------------------------------------
+######------------------------------------ Setting App Layout----------------------------------------------
 app.layout = html.Div([dcc.Interval(
                         n_intervals=0,
                         interval=24*60*60*1000,
                         id='interval_component'
                     ),
-                html.Div([
-                    dbc.Row(dbc.Col(dcc.Markdown(title), width={'size': 6})),
-
-                    dbc.Row(
-                        dbc.Col(dbc.Tabs(
-                            [
-                                dbc.Tab(world_cases, label='Cases', label_style={'fontWeight': 'bold'},tab_id='world_cases'),
-                                dbc.Tab(world_deaths, label='Deaths', label_style={'fontWeight': 'bold'},tab_id='world_deaths')
-                            ],
-                            active_tab='world_cases'
-                        ), align='center')
-                    ),
-
-                    dbc.Row(
-                        dbc.Col(dcc.Markdown(cas_dth), width={'size': 10, 'offset': 2})
-                    ),
-
-                    dbc.Row(
-                        [
-                            dbc.Col(html.Div(cd_grph_cases), width={'size': 6, 'order': 1}),
-                            dbc.Col(html.Div(cd_grph_deaths), width={'size': 6, 'order': 2})
-                        ],
-                    ),
-
-                    dbc.Row(
-                        dbc.Col(Cardtabs, width={'size': 12})
-                    ),
-
-                    dbc.Row(
-                        dbc.Col(
-                            dcc.Dropdown(id='country_dropdown', options=countries_option,
-                                         value=['India'], multi=True),
-                            width={'size': 5}
-                        )
-                    ),
-                    dbc.Row(dbc.Col(dcc.Graph(id='countryGraph'), width={'size': 12}))],
-                    id = 'LayoutDiv')
-                    ],
+                html.Div(app_layout,
+                         id='Lat=youtDiv')],
                               id='main_div')
 
+#----------------------------------------------------------------------------------------------------------
 
 ####------------------------------------------ CallBacks--------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------
@@ -292,44 +304,8 @@ def updateLayout(n):
     global df
     global link
     df = pd.read_csv(link)
-    layout = [dbc.Row(
-        dbc.Col(dcc.Markdown(title), width={'size': 6})
-    ),
-
-        dbc.Row(
-            dbc.Col(dbc.Tabs(
-                [
-                    dbc.Tab(world_cases, label='Cases', label_style={'fontWeight': 'bold'},tab_id='world_cases'),
-                    dbc.Tab(world_deaths, label='Deaths', label_style={'fontWeight': 'bold'},tab_id='world_deaths')
-                ],
-                active_tab='world_cases'
-            ), align='center')
-        ),
-
-        dbc.Row(
-            dbc.Col(dcc.Markdown(cas_dth), width={'size': 10, 'offset': 2})
-        ),
-
-        dbc.Row(
-            [
-                dbc.Col(html.Div(cd_grph_cases), width={'size': 6, 'order': 1}),
-                dbc.Col(html.Div(cd_grph_deaths), width={'size': 6, 'order': 2})
-            ],
-        ),
-
-        dbc.Row(
-            dbc.Col(Cardtabs, width={'size': 12})
-        ),
-
-        dbc.Row(
-            dbc.Col(
-                dcc.Dropdown(id='country_dropdown', options=countries_option,
-                             value=['India'], multi=True),
-                width={'size': 5}
-            )
-        ),
-        dbc.Row(dbc.Col(dcc.Graph(id='countryGraph'), width={'size': 12}))
-    ]
+    df = data_preprcoss(df)
+    layout = app_layout
     return layout
 
 #---------------------------------------------------------------------------------------------------------
@@ -354,14 +330,13 @@ def render_content(tab):
 def render_country(countries):
     global  df
     fig = go.Figure()
-    for country in countries:
-        dff = df[df['country']==country]
-        fig.add_trace(go.Scatter(x=dff['date'],y=dff['cases'],fill='tozeroy',name=country))
+    for c in countries:
+        dff = df.loc[df['country']==c]
+        fig.add_trace(go.Scatter(x=dff['date'],y=dff['cases'],fill='tozeroy',name=c))
     fig.update_xaxes(rangeslider_visible=True)
     return fig
 
 #----------------------------------------------------------------------------------------------------------
-# chloropleth Mpabox - https://plotly.com/python/mapbox-county-choropleth/
 
 if __name__ == '__main__':
     app.run_server()
