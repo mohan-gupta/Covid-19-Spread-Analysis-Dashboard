@@ -9,42 +9,36 @@ from dash.dependencies import Input,Output
 import datetime
 import plotly.graph_objects as go
 
-
 #----------------------------------------------------------------------------------------------------------
 #Reading the data
-link = r'https://opendata.ecdc.europa.eu/covid19/casedistribution/csv'
-df = pd.read_csv(link)
-#df = pd.read_csv('data.csv')
+link = r'https://covid.ourworldindata.org/data/owid-covid-data.csv'
+df = pd.read_csv('owid-covid-data.csv')
 print('data set extracted')
 
 #Data Pre-Processing
-def data_preprcoss(df):
-    #Renamin Columns
-    df.rename(columns={'countriesAndTerritories':'country','countryterritoryCode':'isocode',
-                      'popData2019':'population','continentExp':'continent'},inplace=True)
+def data_preProcess(df):
+    # extracting useful columns
+    cols = ['iso_code', 'continent', 'location', 'date', 'total_cases', 'new_cases',
+            'total_deaths', 'new_deaths', 'population']
+    df = df[cols]
 
-    #Dropping unnecessary Columns, dropping dateRep due to uncosistent data
-    df.drop(['dateRep','geoId','Cumulative_number_for_14_days_of_COVID-19_cases_per_100000'],axis=1,inplace=True)
+    # Extracting records where continent is not missing
+    df2 = df[~df['continent'].isnull()]
 
-    #Formatting Columns
-    df['country']=df['country'].apply(lambda x:x.replace('_',' '))
+    #filling null data with 0
+    df3 = df2.fillna(0)
 
-    #imputing missing Data
-    df.loc[df['country']=='Wallis and Futuna','isocode']='WLF'
+    #renaming colums
+    df3.rename(columns={'iso_code':'isocode','location':'country',
+                        'new_cases':'cases','new_deaths':'deaths'},inplace=True)
 
-    df.loc[df['country']=='Wallis and Futuna','population']=11164
+    #converting date to datetime
+    df3['date'] = pd.to_datetime(df3['date'])
 
-    df['isocode'].fillna('Not Provided',inplace=True)
 
-    df['population'].fillna('Not Provided',inplace=True)
-    df['population'].fillna('Not Provided',inplace=True)
+    return df3
 
-    #generating date from other columns
-    df['date'] =  df['year'].astype(str)+'-'+df['month'].astype(str) +'-'+df['day'].astype(str)
-    df['date'] = pd.to_datetime(df['date'])
-    return df
-
-df = data_preprcoss(df)
+df = data_preProcess(df)
 
 #----------------------------------------------------------------------------------------------------------
 #Reading unique countries and generating list of options
@@ -98,26 +92,26 @@ def get_data(period):
                 1: for 24 hrs,
                 7: for last 7 days,
                 14: for last 14 days'''
-    if period==0:
+    if period == 0:
         df_date = df
-    elif period==1:
-        last_24hrs = pd.to_datetime(datetime.date.today()-datetime.timedelta(1))
-        df_date = df[df['date']==last_24hrs]
+    elif period == 1:
+        last_24hrs = pd.to_datetime(datetime.date.today() - datetime.timedelta(1))
+        df_date = df[df['date'] == last_24hrs]
 
     else:
         dates = pd.date_range(end=datetime.date.today(), periods=period, freq='1D')
         df_date = df[df['date'].isin(dates)]
 
     new_df = df_date.groupby('country', as_index=False).agg({'cases': 'sum', 'deaths': 'sum'})
-    new_df.sort_values(by='cases', ascending=False)
+    new_df = new_df.sort_values(by='cases', ascending=False)
 
-    master_df = pd.merge(new_df, df_date.iloc[:, [5,6,7,8]], on='country')
+    master_df = pd.merge(new_df, df_date.loc[:, ['isocode', 'country', 'continent', 'population']], on='country',
+                         how='right')
     master_df = master_df.drop_duplicates()
     master_df = master_df.reset_index(drop=True)
 
-    master_df = master_df.sort_values(by='cases', ascending=False,ignore_index=True)
-    master_df = master_df.reset_index()
-    master_df['index']+=1
+    master_df = master_df.sort_values(by='cases', ascending=False, ignore_index=True)
+    master_df.insert(loc=0, column='#', value=master_df.index + 1)
 
     return master_df
 
@@ -285,7 +279,7 @@ app_layout =[
 ######------------------------------------ Setting App Layout----------------------------------------------
 app.layout = html.Div([dcc.Interval(
                         n_intervals=0,
-                        interval=24*60*60*1000,
+                        interval=2*60*60*1000,   # Updates every 2hrs
                         id='interval_component'
                     ),
                 html.Div(app_layout,
@@ -293,7 +287,6 @@ app.layout = html.Div([dcc.Interval(
                               id='main_div')
 
 #----------------------------------------------------------------------------------------------------------
-
 ####------------------------------------------ CallBacks--------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------
 
@@ -304,7 +297,7 @@ def updateLayout(n):
     global df
     global link
     df = pd.read_csv(link)
-    df = data_preprcoss(df)
+    df = data_preProcess(df)
     layout = app_layout
     return layout
 
