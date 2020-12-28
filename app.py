@@ -12,7 +12,7 @@ import plotly.graph_objects as go
 #----------------------------------------------------------------------------------------------------------
 #Reading the data
 link = r'https://covid.ourworldindata.org/data/owid-covid-data.csv'
-df = pd.read_csv('owid-covid-data.csv')
+df = pd.read_csv(link)
 print('data set extracted')
 
 #Data Pre-Processing
@@ -29,7 +29,7 @@ def data_preProcess(df):
     df3 = df2.fillna(0)
 
     #renaming colums
-    df3.rename(columns={'iso_code':'isocode','location':'country',
+    df3.rename(columns={'location':'country',
                         'new_cases':'cases','new_deaths':'deaths'},inplace=True)
 
     #converting date to datetime
@@ -50,12 +50,12 @@ countries_option = [{'label':i,'value':i} for i in df['country'].unique()]
 
 #----------------------------Function to plot world map---------------------------------------------------
 def map_cases_deaths(df,feature):
-    country_cases = df.groupby(['isocode',
+    country_cases = df.groupby(['iso_code',
                                 'country'],
                                as_index=False)[feature].sum()
 
     fig = px.choropleth(country_cases,
-                        locations="isocode",
+                        locations="iso_code",
                         color=feature,
                         hover_name="country",color_continuous_scale=px.colors.sequential.Jet)
 
@@ -86,26 +86,27 @@ def plot_pct(df,feature,show_all=False):
 
 #----------------------------------------------------------------------------------------------------------
 ##----------------------------------- function to get dataFrame for days ----------------------------------
-def get_data(period):
+def get_data(df,period):
     '''date can be 0,1,7,14
                 0: for Total,
                 1: for 24 hrs,
                 7: for last 7 days,
                 14: for last 14 days'''
+    last_rcrd_date = df['date'].max()
     if period == 0:
         df_date = df
     elif period == 1:
-        last_24hrs = pd.to_datetime(datetime.date.today() - datetime.timedelta(1))
+        last_24hrs = pd.to_datetime(last_rcrd_date - datetime.timedelta(1))
         df_date = df[df['date'] == last_24hrs]
 
     else:
-        dates = pd.date_range(end=datetime.date.today(), periods=period, freq='1D')
+        dates = pd.date_range(end=last_rcrd_date, periods=period, freq='1D')
         df_date = df[df['date'].isin(dates)]
 
     new_df = df_date.groupby('country', as_index=False).agg({'cases': 'sum', 'deaths': 'sum'})
     new_df = new_df.sort_values(by='cases', ascending=False)
 
-    master_df = pd.merge(new_df, df_date.loc[:, ['isocode', 'country', 'continent', 'population']], on='country',
+    master_df = pd.merge(new_df, df_date.loc[:, ['iso_code', 'country', 'continent', 'population']], on='country',
                          how='right')
     master_df = master_df.drop_duplicates()
     master_df = master_df.reset_index(drop=True)
@@ -158,10 +159,10 @@ cas_dth = """#### Globally There have been ```{} confirmed Cases``` and ```{} co
 
 #----------------------------------------------------------------------------------------------------------
 #---------------------------------------------- Data frames -----------------------------------------------
-df_total  =get_data(0)
-df_24 = get_data(1)
-df_7 = get_data(7)
-df_14 = get_data(14)
+df_total  =get_data(df,0)
+df_24 = get_data(df,1)
+df_7 = get_data(df,7)
+df_14 = get_data(df,14)
 
 #----------------------------------------------------------------------------------------------------------
 #--------------------------------------------- Data Table -------------------------------------------------
@@ -170,10 +171,6 @@ dt_24 = to_dataTable(df_24,'24')
 dt_7 = to_dataTable(df_7,'7')
 dt_14 = to_dataTable(df_14,'14')
 
-#----------------------------------------------------------------------------------------------------------
-#----------------------------------------- Bootstrap Themes -----------------------------------------------
-
-bs='https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/darkly/bootstrap.min.css'
 
 #----------------------------------------------------------------------------------------------------------
 #---------------------------------------------- BOOTSTRAP CARDS--------------------------------------------
