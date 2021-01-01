@@ -7,7 +7,8 @@ World Map showing Total reported Cases in each country, color scale signifying t
 World Map showing Total reported Deaths in each country, color scale signifying the Number of Cases.
 <br><br>
 <img src = 'https://github.com/Mohan-Gupta/Covid-19-Spread-Analysis-Dashboard/blob/main/Plots%20and%20Components/Top10.png'>
-Two Bar Plots showcasing the 10 countries with Highest number of Cases and Deaths respectively.
+Two Bar Plots showcasing the 10 countries with Highest number of Cases and Deaths respectively.<br>
+And also the percentage of Cases and Deaths are reported from these countries among Globally confirmed Cases and Deaths.<br>
 <br><br>
 <img src = 'https://github.com/Mohan-Gupta/Covid-19-Spread-Analysis-Dashboard/blob/main/Plots%20and%20Components/DataTable.png'><br><br>
 Data Table displaying the records or each country, Cases Reported, Deaths Reported, their ISO code, Population and
