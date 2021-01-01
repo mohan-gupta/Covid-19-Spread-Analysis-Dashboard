@@ -19,5 +19,9 @@ Data Table displaying the records or each country, Cases Reported, Deaths Report
  <img src = 'https://github.com/Mohan-Gupta/Covid-19-Spread-Analysis-Dashboard/blob/main/Plots%20and%20Components/Country.png'><br><br>
  An Area chart that shows the time series data for country(countries) selected from the dropdown menu
  <br><br>
+ This Dashboard is made using [Plotly's Dash Framework](https://dash.plotly.com/)<br>
+ <p>While Dash apps are viewed in the web browser, we don’t have to write any JavaScript or HTML.<br>
+Dash provides a Python interface to a rich set of interactive web-based components.
+</p><br>
  Data Source: Our World in Data<br>
  site link: https://ourworldindata.org
