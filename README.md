@@ -1,5 +1,7 @@
 # [Covid-19-Spread-Analysis-Dashboard](https://covid-board.herokuapp.com/)
-Dashboard, Tracks Real-Time data on Covid-19<br><br><br>
+Dashboard, Tracks Real-Time data on Covid-19<br><br>
+<img src = 'https://github.com/mohan-gupta/Covid-19-Spread-Analysis-Dashboard/blob/main/Plots/demo.gif'>
+<br>
 <img src ='https://github.com/Mohan-Gupta/Covid-19-Spread-Analysis-Dashboard/blob/main/Plots/world_map_cases.png'>
 World Map showing Total reported Cases in each country, color scale signifying the Number of Cases.
 <br><br>
