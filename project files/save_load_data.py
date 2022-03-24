@@ -8,7 +8,7 @@ class ProcessData:
         self.df = None
 
     def read_data(self):
-        """Reads the data from the link and saves it as csv file"""
+        """Reads the data from the link"""
         self.df = pd.read_csv(self.link)
         print("Data-Set Extracted")
 

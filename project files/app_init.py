@@ -1,7 +1,6 @@
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html, dcc
 from save_load_data import ProcessData
-from app_grid import CreateLayout
+from app_layout_grid import CreateLayout
 from layout_content import PrepareLayoutContent
 from get_plots import Plots
 
@@ -36,9 +35,6 @@ class App:
             ],
             id='main_div')
         return app_grid
-
-    def get_table_content(self):
-        return self.table_content
 
     def get_plot(self):
         return self.plots

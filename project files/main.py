@@ -27,32 +27,25 @@ def updateLayout(n):
     layout = initializer.get_app_layout()
     return layout
 
-#-- call back to update table content on tab selection
-@app.callback(Output("tableContent", 'children'),
-              [Input('tabTables', "active_tab")])
-def render_content(tab):
-    global initializer
-
-    table = initializer.get_table_content()
-    cntnt_total, cntnt_24, cntnt_7, cntnt_14 = table.get_table_tabs_body()
-    if tab == 'totalTab':
-        return cntnt_total
-    elif tab == '24Tab':
-        return cntnt_24
-    elif tab == '7Tab':
-        return cntnt_7
-    elif tab == '14Tab':
-        return cntnt_14
-
-#-- call back to get country data
-@app.callback(Output('countryGraph','figure'),
+#-- call back to get daily cases
+@app.callback(Output('country_cases_Graph','figure'),
               [Input('country_dropdown','value')])
 def render_country(countries):
     global initializer
 
     plot = initializer.get_plot()
-    fig = plot.plot_area(countries)
+    fig = plot.plot_area(countries, 'cases')
+    return fig
+
+#-- call back to get daily deaths
+@app.callback(Output('country_deaths_Graph','figure'),
+              [Input('country_dropdown','value')])
+def render_country(countries):
+    global initializer
+
+    plot = initializer.get_plot()
+    fig = plot.plot_area(countries, 'deaths')
     return fig
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()

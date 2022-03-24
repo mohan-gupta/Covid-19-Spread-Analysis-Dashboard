@@ -1,22 +1,45 @@
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 from get_plots import Plots
-from prep_data_table import CreateDataTable
+from prep_data_frames import CreateDataFrames
 
 class PrepareLayoutContent:
     def __init__(self, df):
         self.df = df
         self.plots = Plots(self.df)
-        self.tables = CreateDataTable(self.df)
+        self.tables = CreateDataFrames(self.df)
         self.app_layout = None
-        self.cntnt_total = None
-        self.cntnt_24 = None
-        self.cntnt_7 = None
-        self.cntnt_14 = None
+        self.total, self.day1, self.day7, self.day14 = self.tables.get_data_frames()
+
+    def get_case_card(self):
+        fmt_case = format(self.df['cases'].sum(), ',')
+        fmt_death = format(self.df['deaths'].sum(), ',')
+        case_card = dbc.Card(
+            dbc.CardBody(
+                [
+                    html.H4("Total Cases", className="card-title"),
+                    html.H6(f"{fmt_case}", className="card-subtitle"),
+                ]
+            ),
+            style={"width": "18rem",'background-color': 'rgb(26, 24, 24)', 'border-width': 'medium'}, inverse=True
+        )
+
+        death_card = dbc.Card(
+            dbc.CardBody(
+                [
+                    html.H5("Total Deaths", className="card-title"),
+                    html.H6(f"{fmt_death}", className="card-subtitle"),
+                ],
+            ),
+            style={"width": "18rem",'background-color': 'rgb(26, 24, 24)', 'border-width': 'medium'}, inverse=True
+        )
+
+        return case_card, death_card
 
     def create_navbar(self):
         title = """### Covid-19 Spread Analysis"""
+
+        cs_card, dth_card = self.get_case_card()
 
         word_link = html.A(
             # Use row and col to control vertical alignment of logo / brand
@@ -36,6 +59,10 @@ class PrepareLayoutContent:
         navbar = dbc.Navbar(
             [
                 word_link,
+                dbc.Row([
+                    dbc.Col(cs_card),
+                    dbc.Col(dth_card)
+                ]),
                 dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
             ],
             id="navbar",
@@ -70,77 +97,76 @@ class PrepareLayoutContent:
 
         return case_death_tabs
 
-    def get_case_markdown(self):
+    def get_bar_plots_cards(self):
+        cases_total = dbc.Card(dcc.Graph(
+            id='total_cases_bar',
+            figure=self.plots.plot_bar(self.total,'Total')),
+            style={'overflowY': 'scroll', 'height': 400}
+        )
 
-        fmt_case = format(self.df['cases'].sum(), ',')
-        fmt_death = format(self.df['deaths'].sum(), ',')
+        cases_24 = dbc.Card(dcc.Graph(
+            id='24_cases_bar',
+            figure=self.plots.plot_bar(self.day1, '24H')),
+            style={'overflowY': 'scroll', 'height': 400}
+        )
 
-        case_death = """#### Globally There have been ```{} confirmed Cases``` and ```{} confirmed Deaths``` """.format(
-            fmt_case, fmt_death)
+        cases_7 = dbc.Card(dcc.Graph(
+            id='7_cases_bar',
+            figure=self.plots.plot_bar(self.day7, '7 Days')),
+            style={'overflowY': 'scroll', 'height': 400}
+        )
 
-        case_death_md = dcc.Markdown(case_death)
+        cases_14 = dbc.Card(dcc.Graph(
+            id='14_cases_bar',
+            figure=self.plots.plot_bar(self.day14, '14 Days')),
+            style={'overflowY': 'scroll', 'height': 400}
+        )
 
-        return case_death_md
 
-    def create_bar_plots(self):
+        bar_tabs = dbc.Tabs(
+            [
+                dbc.Tab(cases_total, label='Total', label_style={'fontWeight': 'bold'},
+                        tab_id='total'),
+                dbc.Tab(cases_24, label='24H', label_style={'fontWeight': 'bold'},
+                        tab_id='24h'),
+                dbc.Tab(cases_7, label='7 Days', label_style={'fontWeight': 'bold'},
+                        tab_id='7days'),
+                dbc.Tab(cases_14, label='14 Days', label_style={'fontWeight': 'bold'},
+                        tab_id='14days')
+            ],
+            active_tab='total'
+        )
+        return bar_tabs
+
+    def create_pie_chart(self):
         # - Card For Cases (Barplot)
 
-        cases_bar = dbc.Card(dcc.Graph(
+        cases_pie = dbc.Card(dcc.Graph(
             id='wordBar_cases',
             figure = self.plots.plot_pct('cases')),
-            body=True)
-
-        cases_bar_div = html.Div(cases_bar)
+            style={'height': 500, 'width': 600}
+        )
 
         # - Card For Deaths (Barplot)
 
-        deaths_bar = dbc.Card(dcc.Graph(
+        deaths_pie = dbc.Card(dcc.Graph(
             id='wordBar_deaths',
             figure = self.plots.plot_pct('deaths')),
-            body=True)
-
-        deaths_bar_div = html.Div(deaths_bar)
-
-        return cases_bar_div, deaths_bar_div
-
-    def create_table_tabs(self):
-        card_header = dbc.CardHeader(
-                dbc.Tabs(
-                    children=[
-                        dbc.Tab(label='Total', tab_id='totalTab', label_style={'fontWeight': 'bold'}),
-                        dbc.Tab(label='24 Hrs', tab_id='24Tab', label_style={'fontWeight': 'bold'}),
-                        dbc.Tab(label='7 Days', tab_id='7Tab', label_style={'fontWeight': 'bold'}),
-                        dbc.Tab(label='14 Days', tab_id='14Tab', label_style={'fontWeight': 'bold'}),
-                    ],
-                    id='tabTables',
-                    card=True,
-                    active_tab='totalTab'
-                )
+            style={'height': 500, 'width': 600}
             )
-        return card_header
 
-    def get_table_tabs_body(self):
-        dt_total, dt_24, dt_7, dt_14 = self.tables.get_data_tables()
-
-        self.cntnt_total = dbc.Card(dt_total)
-        self.cntnt_24 = dbc.Card(dt_24)
-        self.cntnt_7 = dbc.Card(dt_7)
-        self.cntnt_14 = dbc.Card(dt_14)
-
-        return self.cntnt_total, self.cntnt_24, self.cntnt_7, self.cntnt_14
-
-    def create_table(self):
-        table_header  = self.create_table_tabs()
-        table_cntnt, _, _, _ = self.get_table_tabs_body()
-
-        table = dbc.Card(
+        case_death_tabs = dbc.Tabs(
             [
-                table_header,
-                dbc.CardBody(html.Div(id="tableContent")),
+                dbc.Tab(cases_pie, label='Cases', label_style={'fontWeight': 'bold'},
+                        tab_id='pct_cases'),
+                dbc.Tab(deaths_pie, label='Deaths', label_style={'fontWeight': 'bold'},
+                        tab_id='pct_deaths')
             ],
-            style={'padding': 3})
+            active_tab='pct_cases'
+        )
 
-        return table
+        return case_death_tabs
+
 
     def create_drpdown(self):
         # Reading unique countries and generating list of options for dropdown
