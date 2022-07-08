@@ -24,6 +24,7 @@ def updateLayout(n):
     #reload dataset
     global initializer
     initializer = App()
+    initializer.process_data.read_data()
     layout = initializer.get_app_layout()
     return layout
 
@@ -32,7 +33,6 @@ def updateLayout(n):
               [Input('country_dropdown','value')])
 def render_country(countries):
     global initializer
-
     plot = initializer.get_plot()
     fig = plot.plot_area(countries, 'cases')
     return fig
