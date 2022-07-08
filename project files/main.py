@@ -25,6 +25,7 @@ def updateLayout(n):
     global initializer
     initializer = App()
     initializer.process_data.read_data()
+    initializer.process_data.save_data()
     layout = initializer.get_app_layout()
     return layout
 
