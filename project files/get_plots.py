@@ -27,7 +27,7 @@ class Plots:
                                        'x':0.5,
                                        'xanchor': 'center',
                                        'yanchor': 'top'},
-                          autosize=False,width=600, height=500,)
+                          autosize=False,width=685, height=500,)
         return fig
 
     def plot_pct(self, feature):
@@ -53,7 +53,7 @@ class Plots:
                           xaxis_title='Countries',
                           yaxis_title='Percent {} (%)'.format(feature),
                           template="plotly_dark", showlegend=False,
-                          autosize=False, width=600, height=500,
+                          autosize=False, width=680, height=500,
                           annotations=[dict(text=f"{format(self.df[feature].sum(), ',')}", x=0.5, y=0.5,
                                             font_size=11, showarrow=False)]
                           )
@@ -126,7 +126,7 @@ class Plots:
         fig.update_coloraxes(showscale=False)
         fig.update_layout(
             title=label,
-            height=3900, width=1230, autosize=False,
+            height=3900, width=1380, autosize=False,
             template="plotly_dark",
             yaxis_title="Country",
         )
