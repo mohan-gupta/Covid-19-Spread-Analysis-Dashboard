@@ -14,14 +14,15 @@ class PrepareLayoutContent:
     def get_case_card(self):
         fmt_case = format(self.df['cases'].sum(), ',')
         fmt_death = format(self.df['deaths'].sum(), ',')
+
         case_card = dbc.Card(
             dbc.CardBody(
                 [
-                    html.H4("Total Cases", className="card-title"),
+                    html.H5("Total Cases", className="card-title"),
                     html.H6(f"{fmt_case}", className="card-subtitle"),
                 ]
             ),
-            style={"width": "18rem",'background-color': 'rgb(26, 24, 24)', 'border-width': 'medium'}, inverse=True
+            style={'width':'12rem', 'background-color': 'rgb(26, 24, 24)', 'border-width': 'medium'}, inverse=True,
         )
 
         death_card = dbc.Card(
@@ -31,7 +32,7 @@ class PrepareLayoutContent:
                     html.H6(f"{fmt_death}", className="card-subtitle"),
                 ],
             ),
-            style={"width": "18rem",'background-color': 'rgb(26, 24, 24)', 'border-width': 'medium'}, inverse=True
+            style={'width':'12rem', 'background-color': 'rgb(26, 24, 24)', 'border-width': 'medium'}, inverse=True,
         )
 
         return case_card, death_card
@@ -47,10 +48,10 @@ class PrepareLayoutContent:
                 [
                     dbc.Col(dbc.NavbarBrand(
                         dcc.Markdown(title, style={'color': 'rgb(38, 221, 237)'}),
-                        className="ml-2")),
+                        className="ml-2"),
+                    xs = 10, sm = 10, md = 12, lg = 6, xl = 6)
                 ],
-                align="center",
-                no_gutters=True,
+                align="left",
             ),
             id="world_layout",
             href="/",
@@ -60,9 +61,13 @@ class PrepareLayoutContent:
             [
                 word_link,
                 dbc.Row([
-                    dbc.Col(cs_card),
-                    dbc.Col(dth_card)
-                ]),
+                    dbc.Col(xs = 0, sm = 0, md = 0, lg = 3, xl = 3, align="left"),
+                    dbc.Col(cs_card, xs = 10, sm = 10, md = 10, lg = 3, xl = 3, align="left"),
+                    dbc.Col(xs=0, sm=0, md=0, lg=3, xl=3, align="left"),
+                    dbc.Col(dth_card, xs = 10, sm = 10, md = 10, lg = 3, xl = 3, align='right')
+                    ],
+                    align="right"
+                ),
                 dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
             ],
             id="navbar",
@@ -75,13 +80,15 @@ class PrepareLayoutContent:
         world_cases_map = dbc.Card(
             dcc.Graph(
                 id='wordMap_cases',
-                figure= self.plots.map_cases_deaths('cases')
+                figure= self.plots.map_cases_deaths('cases'),
+                responsive = True
             )
         )
         world_deaths_map = dbc.Card(
             dcc.Graph(
                 id='wordMap_deaths',
-                figure= self.plots.map_cases_deaths('deaths')
+                figure= self.plots.map_cases_deaths('deaths'),
+                responsive=True
             )
         )
 
@@ -143,16 +150,16 @@ class PrepareLayoutContent:
 
         cases_pie = dbc.Card(dcc.Graph(
             id='wordBar_cases',
-            figure = self.plots.plot_pct('cases')),
-            style={'height': 500, 'width': 600}
+            figure = self.plots.plot_pct('cases'),
+            responsive = True)
         )
 
         # - Card For Deaths (Barplot)
 
         deaths_pie = dbc.Card(dcc.Graph(
             id='wordBar_deaths',
-            figure = self.plots.plot_pct('deaths')),
-            style={'height': 500, 'width': 600}
+            figure = self.plots.plot_pct('deaths'),
+            responsive = True)
             )
 
         case_death_tabs = dbc.Tabs(
