@@ -7,7 +7,7 @@ from get_plots import Plots
 class App:
     def __init__(self):
         self.process_data = ProcessData()
-        #self.process_data.save_data()
+        self.process_data.save_data()
 
         self.df = self.process_data.load_data()
 
