@@ -13,7 +13,7 @@ app = dash.Dash(__name__,external_stylesheets=[dbc.themes.DARKLY],
                             'content':'width=device-width, initial-scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}])
 
 #this tells the dash that we are running our app on a server
-#server = app.server
+server = app.server
 
 # Setting App Layout
 app.layout =initializer.get_app_layout()
