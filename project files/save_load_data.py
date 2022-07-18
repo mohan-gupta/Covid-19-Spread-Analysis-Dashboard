@@ -41,7 +41,7 @@ class ProcessData:
 
     def save_data(self):
         #first pre process the data
-        if self.df==None:
+        if self.df is None:
             self.read_data()
         self.df = self.pre_process_data()
 
